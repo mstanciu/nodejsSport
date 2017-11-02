@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="sevents" id="Project_325cde2" template="Default" database="MySql" >
+	<schema name="sevents" schemaname="sevents" >
+		<table name="event" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="name" type="varchar" length="50" jt="12" mandatory="y" />
+			<column name="location" type="varchar" length="50" jt="12" />
+			<index name="pk_event_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="event_type" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="name" type="varchar" length="50" jt="12" mandatory="y" />
+			<index name="pk_event_type_id_0" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="event_type_rel" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="id_event" type="int" jt="4" />
+			<column name="id_event_type" type="int" jt="4" />
+			<index name="pk_event_type_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_event_type_rel_id_event" unique="UNIQUE" >
+				<column name="id_event" />
+			</index>
+			<index name="unq_event_type_rel_id_type" unique="UNIQUE" >
+				<column name="id_event_type" />
+			</index>
+			<fk name="fk_event_type_rel_event" to_schema="sevents" to_table="event" >
+				<fk_column name="id_event" pk="id" />
+			</fk>
+			<fk name="fk_event_type_rel_event_type" to_schema="sevents" to_table="event_type" >
+				<fk_column name="id_event_type" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="user" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="email" type="varchar" length="150" jt="12" mandatory="y" />
+			<column name="password" type="varchar" length="200" jt="12" mandatory="y" />
+			<column name="firstname" type="varchar" length="50" jt="12" />
+			<column name="lastname" type="varchar" length="50" jt="12" />
+			<column name="gender" type="varchar" length="20" jt="12" />
+			<column name="age" type="int" jt="4" unsigned="y" />
+			<index name="pk_user_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="emailuniq" unique="DISTRIBUTION_KEY" >
+				<column name="email" />
+			</index>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="user_event_rel" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="id_user" type="int" jt="4" />
+			<column name="id_event" type="int" jt="4" />
+			<index name="pk_user_event_rel_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_user_event_rel_id_user" unique="UNIQUE" >
+				<column name="id_user" />
+			</index>
+			<index name="unq_user_event_rel_id_event" unique="UNIQUE" >
+				<column name="id_event" />
+			</index>
+			<fk name="fk_user_event_rel_user" to_schema="sevents" to_table="user" >
+				<fk_column name="id_user" pk="id" />
+			</fk>
+			<fk name="fk_user_event_rel_event" to_schema="sevents" to_table="event" >
+				<fk_column name="id_event" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+		<table name="user_friend_rel" >
+			<column name="id" type="int" jt="4" mandatory="y" autoincrement="y" />
+			<column name="id_user" type="int" jt="4" />
+			<column name="id_friend" type="int" jt="4" />
+			<column name="status" type="int" length="1" jt="4" mandatory="y" >
+				<defo>1</defo>
+				<comment><![CDATA[1 - no friend
+2 - add request -> pending
+3 - rejected
+4 - accepted]]></comment>
+			</column>
+			<index name="pk_user_friend_rel_id" unique="PRIMARY_KEY" >
+				<column name="id" />
+			</index>
+			<index name="unq_user_friend_rel_id_user" unique="UNIQUE" >
+				<column name="id_user" />
+			</index>
+			<index name="unq_user_friend_rel_id_friend" unique="UNIQUE" >
+				<column name="id_friend" />
+			</index>
+			<fk name="fk_user_friend_rel_user" to_schema="sevents" to_table="user" >
+				<fk_column name="id_user" pk="id" />
+			</fk>
+			<fk name="fk_user_friend_rel_user_0" to_schema="sevents" to_table="user" >
+				<fk_column name="id_friend" pk="id" />
+			</fk>
+			<storage><![CDATA[engine=InnoDB]]></storage>
+		</table>
+	</schema>
+	<layout name="Default Layout" id="Layout_2ec1620" show_relation="columns" >
+		<entity schema="sevents" name="event" color="1f5182" x="435" y="420" />
+		<entity schema="sevents" name="event_type" color="3399ff" x="855" y="435" />
+		<entity schema="sevents" name="user_friend_rel" color="ff0000" x="810" y="75" />
+		<entity schema="sevents" name="user_event_rel" color="ff0000" x="660" y="255" />
+		<entity schema="sevents" name="event_type_rel" color="3399ff" x="615" y="510" />
+		<entity schema="sevents" name="user" color="ff0033" x="480" y="150" />
+		<callout x="45" y="45" pointer="NO" >
+			<comment><![CDATA[This project is in offline mode.
+Design the schema and save the design to project file. Later create or upgrade the schema on any database.
+Right-click the layout to add new tables. Drop this callout from its right-click pop-up menu.]]></comment>
+		</callout>
+		<script name="Sql_Editor" id="Editor_14160d7" language="SQL" >
+			<string><![CDATA[CREATE SCHEMA sevents;
+
+CREATE TABLE sevents.event ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	name                 varchar(50)  NOT NULL  ,
+	location             varchar(50)    ,
+	CONSTRAINT pk_event_id PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE TABLE sevents.event_type ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	name                 varchar(50)  NOT NULL  ,
+	CONSTRAINT pk_event_type_id_0 PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE TABLE sevents.event_type_rel ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	id_event             int    ,
+	id_event_type        int    ,
+	CONSTRAINT pk_event_type_id PRIMARY KEY ( id ),
+	CONSTRAINT unq_event_type_rel_id_event UNIQUE ( id_event ) ,
+	CONSTRAINT unq_event_type_rel_id_type UNIQUE ( id_event_type ) 
+ ) engine=InnoDB;
+
+CREATE TABLE sevents.`user` ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	email                varchar(150)  NOT NULL  ,
+	password             varchar(200)  NOT NULL  ,
+	firstname            varchar(50)    ,
+	lastname             varchar(50)    ,
+	gender               varchar(20)    ,
+	age                  int UNSIGNED   ,
+	CONSTRAINT pk_user_id PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE TABLE sevents.user_event_rel ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	id_user              int    ,
+	id_event             int    ,
+	CONSTRAINT pk_user_event_rel_id PRIMARY KEY ( id ),
+	CONSTRAINT unq_user_event_rel_id_user UNIQUE ( id_user ) ,
+	CONSTRAINT unq_user_event_rel_id_event UNIQUE ( id_event ) 
+ ) engine=InnoDB;
+
+CREATE TABLE sevents.user_friend_rel ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	id_user              int    ,
+	id_friend            int    ,
+	status               int  NOT NULL DEFAULT 1 ,
+	CONSTRAINT pk_user_friend_rel_id PRIMARY KEY ( id ),
+	CONSTRAINT unq_user_friend_rel_id_user UNIQUE ( id_user ) ,
+	CONSTRAINT unq_user_friend_rel_id_friend UNIQUE ( id_friend ) 
+ ) engine=InnoDB;
+
+ALTER TABLE sevents.user_friend_rel MODIFY status int  NOT NULL DEFAULT 1  COMMENT '1 - no friend
+2 - add request -> pending
+3 - rejected
+4 - accepted';
+
+ALTER TABLE sevents.event_type_rel ADD CONSTRAINT fk_event_type_rel_event FOREIGN KEY ( id_event ) REFERENCES sevents.event( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE sevents.event_type_rel ADD CONSTRAINT fk_event_type_rel_event_type FOREIGN KEY ( id_event_type ) REFERENCES sevents.event_type( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE sevents.user_event_rel ADD CONSTRAINT fk_user_event_rel_user FOREIGN KEY ( id_user ) REFERENCES sevents.`user`( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE sevents.user_event_rel ADD CONSTRAINT fk_user_event_rel_event FOREIGN KEY ( id_event ) REFERENCES sevents.event( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE sevents.user_friend_rel ADD CONSTRAINT fk_user_friend_rel_user FOREIGN KEY ( id_user ) REFERENCES sevents.`user`( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE sevents.user_friend_rel ADD CONSTRAINT fk_user_friend_rel_user_0 FOREIGN KEY ( id_friend ) REFERENCES sevents.`user`( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+]]></string>
+		</script>
+		<script name="Sql_Editor_001" id="Editor_1afce67" language="SQL" >
+			<string><![CDATA[CREATE SCHEMA sevents;
+
+CREATE TABLE sevents.event ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	name                 varchar(50)  NOT NULL  ,
+	location             varchar(50)    ,
+	CONSTRAINT pk_event_id PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE TABLE sevents.event_type ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	name                 varchar(50)  NOT NULL  ,
+	CONSTRAINT pk_event_type_id_0 PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE TABLE sevents.event_type_rel ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	id_event             int    ,
+	id_event_type        int    ,
+	CONSTRAINT pk_event_type_id PRIMARY KEY ( id ),
+	CONSTRAINT unq_event_type_rel_id_event UNIQUE ( id_event ) ,
+	CONSTRAINT unq_event_type_rel_id_type UNIQUE ( id_event_type ) 
+ ) engine=InnoDB;
+
+CREATE TABLE sevents.`user` ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	email                varchar(150)  NOT NULL UNIQUE ,
+	password             varchar(200)  NOT NULL  ,
+	firstname            varchar(50)    ,
+	lastname             varchar(50)    ,
+	gender               varchar(20)    ,
+	age                  int UNSIGNED   ,
+	CONSTRAINT pk_user_id PRIMARY KEY ( id )
+ ) engine=InnoDB;
+
+CREATE TABLE sevents.user_event_rel ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	id_user              int    ,
+	id_event             int    ,
+	CONSTRAINT pk_user_event_rel_id PRIMARY KEY ( id ),
+	CONSTRAINT unq_user_event_rel_id_user UNIQUE ( id_user ) ,
+	CONSTRAINT unq_user_event_rel_id_event UNIQUE ( id_event ) 
+ ) engine=InnoDB;
+
+CREATE TABLE sevents.user_friend_rel ( 
+	id                   int  NOT NULL  AUTO_INCREMENT,
+	id_user              int    ,
+	id_friend            int    ,
+	status               int  NOT NULL DEFAULT 1 ,
+	CONSTRAINT pk_user_friend_rel_id PRIMARY KEY ( id ),
+	CONSTRAINT unq_user_friend_rel_id_user UNIQUE ( id_user ) ,
+	CONSTRAINT unq_user_friend_rel_id_friend UNIQUE ( id_friend ) 
+ ) engine=InnoDB;
+
+ALTER TABLE sevents.user_friend_rel MODIFY status int  NOT NULL DEFAULT 1  COMMENT '1 - no friend
+2 - add request -> pending
+3 - rejected
+4 - accepted';
+
+ALTER TABLE sevents.event_type_rel ADD CONSTRAINT fk_event_type_rel_event FOREIGN KEY ( id_event ) REFERENCES sevents.event( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE sevents.event_type_rel ADD CONSTRAINT fk_event_type_rel_event_type FOREIGN KEY ( id_event_type ) REFERENCES sevents.event_type( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE sevents.user_event_rel ADD CONSTRAINT fk_user_event_rel_user FOREIGN KEY ( id_user ) REFERENCES sevents.`user`( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE sevents.user_event_rel ADD CONSTRAINT fk_user_event_rel_event FOREIGN KEY ( id_event ) REFERENCES sevents.event( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE sevents.user_friend_rel ADD CONSTRAINT fk_user_friend_rel_user FOREIGN KEY ( id_user ) REFERENCES sevents.`user`( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+ALTER TABLE sevents.user_friend_rel ADD CONSTRAINT fk_user_friend_rel_user_0 FOREIGN KEY ( id_friend ) REFERENCES sevents.`user`( id ) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+]]></string>
+		</script>
+	</layout>
+</project>
