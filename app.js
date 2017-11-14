@@ -60,7 +60,7 @@ app.post('/sEvents/getUserData', (req, res) => {
         //console.log(result);
         res.send(result);
     });
-})
+});
 
 app.post('/sEvents/saveUserData', (req, res) => {
     var user = req.body;
@@ -70,7 +70,22 @@ app.post('/sEvents/saveUserData', (req, res) => {
         //console.log(result);
         res.send(result);
     }
-})
+});
+
+app.get('/sEvents/listOfEvents', (req, res) => {
+    con.query("SELECT * from event",(err, result) => {
+        if (err) throw err;
+        res.send(result);
+    });
+});
+
+app.post('/sEvents/user/listOfFriends', (req, res) => {
+    var user = req.body;
+    con.query("SELECT U.firstname, U.lastname FROM User U, user_friend_rel F WHERE U.id = F.id_friend and F.id_friend in (SELECT id_friend from user_friend_rel X, USER Y where X.id_user = (SELECT id from user WHERE email = ?))",[user.email], (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    });
+});
 app.listen(1337);
 
 
