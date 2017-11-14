@@ -11,7 +11,7 @@ var con = mysql.createConnection({
 });
 
 con.connect( (err) => {
-    if (err) throw err;
+    if (err) throw err.stack;
     console.log("connected");
 });
 
@@ -36,26 +36,41 @@ app.get('/user/listofusers', (req, res) => {
 });
 
 app.post('/sEvents/register',(req, res) => {
-    console.log(req.body);
     var user = req.body;
-    var sql = "INSERT IGNORE INTO user (email, password) VALUES ('" + user.email +"', '" + user.password + "')";
-    con.query(sql,(err, result) => {
+    con.query("INSERT IGNORE INTO user (email, password) VALUES (?, ?)",[user.email, user.password],(err, result) => {
         if (err) throw err;
-        console.log("number of records: " + result.affectedRows);
+        //console.log("number of records: " + result.affectedRows);
         res.send(result);
     });
 });
 
 app.post('/sEvents/login', (req, res) => {
     var user = req.body;
-    var sql = "SELECT id FROM user where email ='" + user.email+"'";
-    con.query(sql, (err, result) => {
+    con.query("SELECT id FROM user WHERE email = ? and password = ?",[user.email, user.password], (err, result) => {
         if (err) throw err;
-        console.log(result);
+        //console.log(result);
         res.send(result);
     });
 });
 
+app.post('/sEvents/getUserData', (req, res) => {
+    var user = req.body;
+    con.query("SELECT * FROM user WHERE email = ?", [user.email], (err, result) => {
+        if (err) throw err;
+        //console.log(result);
+        res.send(result);
+    });
+})
+
+app.post('/sEvents/saveUserData', (req, res) => {
+    var user = req.body;
+    con.query("UPDATE user SET firstname = ?, lastname = ? , gender = ?, age = ? WHERE email = ?",
+        [user.firstname, user.lastname, user.gender, user.age, user.email]), (err, result) => {
+        if (err) throw err;
+        //console.log(result);
+        res.send(result);
+    }
+})
 app.listen(1337);
 
 
