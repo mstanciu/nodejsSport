@@ -81,7 +81,7 @@ app.get('/sEvents/listOfEvents', (req, res) => {
 
 app.post('/sEvents/user/listOfFriends', (req, res) => {
     var user = req.body;
-    con.query("SELECT U.firstname, U.lastname, U.id FROM User U, user_friend_rel F WHERE U.id = F.id_friend AND F.id_friend in (SELECT id_friend FROM user_friend_rel X, USER Y WHERE X.id_user = (SELECT id FROM user WHERE email = ?) AND X.status = 4)",[user.email], (err, result) => {
+    con.query("SELECT DISTINCT U.firstname, U.lastname, U.id FROM User U, user_friend_rel F WHERE U.id = F.id_friend AND F.id_friend in (SELECT id_friend FROM user_friend_rel X, USER Y WHERE X.id_user = (SELECT id FROM user WHERE email = ?) AND X.status = 4)",[user.email], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
@@ -91,7 +91,10 @@ app.post('/sEvents/user/removeFriend', (req, res) => {
     var user = req.body;
     con.query("DELETE from user_friend_rel WHERE id_user = ? AND id_friend = ?", [user.userId, user.friendId], (err, result) => {
         if (err) throw err;
-        res.send(result);
+        con.query("DELETE from user_friend_rel WHERE id_user = ? AND id_friend = ?", [user.friendId, user.userId], (err, result) => {
+            if (err) throw err;
+            res.send(result);
+        });
     });
 });
 
@@ -129,6 +132,18 @@ app.post('/sEvents/user/cancelRequest', (req, res) => {
     con.query("DELETE from user_friend_rel WHERE id_user = ? AND id_friend = ?", [user.userId, user.friendId], (err, result) => {
         if (err) throw err;
         con.query("DELETE from user_friend_rel WHERE id_user = ? AND id_friend = ?", [user.friendId, user.userId], (err, result) => {
+            if (err) throw err;
+            res.send(result);
+        });
+    });
+});
+
+
+app.post('/sEvents/user/acceptFriendRequest', (req, res) => {
+    var user = req.body;
+    con.query("UPDATE user_friend_rel SET status = 4 WHERE id_user = ? AND id_friend = ?  and (status = 2 OR status = 3)", [user.userId, user.friendId], (err, result) => {
+        if (err) throw err;
+        con.query("UPDATE user_friend_rel SET status = 4 WHERE id_user = ? AND id_friend = ?  and (status = 2 OR status = 3)", [user.friendId, user.userId], (err, result) => {
             if (err) throw err;
             res.send(result);
         });
