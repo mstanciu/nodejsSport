@@ -72,8 +72,17 @@ app.post('/sEvents/saveUserData', (req, res) => {
     }
 });
 
-app.get('/sEvents/listOfEvents', (req, res) => {
-    con.query("SELECT * from event",(err, result) => {
+app.post('/sEvents/user/events/listOfEvents', (req, res) => {
+    var user = req.body;
+    con.query("SELECT E.id, E.name, T.type_event, L.location FROM event E, event_location L, event_type T, user_event U WHERE U.id_user = ? AND U.id_event = E.id AND E.id = L.id_event and E.id = T.id_event",[user.userId],(err, result) => {
+        if (err) throw err;
+        res.send(result);
+    });
+});
+
+app.post('/sEvents/user/events/userJoinedEvents', (req, res) => {
+    var user = req.body;
+    con.query("SELECT E.name, T.type_event, L.location FROM event E, event_location L, event_type T, event_participants P WHERE P.id_participant = ?  AND P.id_event = E.id AND E.id = L.id_event AND E.id = T.id_event",[user.userId],(err, result) => {
         if (err) throw err;
         res.send(result);
     });
@@ -81,7 +90,7 @@ app.get('/sEvents/listOfEvents', (req, res) => {
 
 app.post('/sEvents/user/listOfFriends', (req, res) => {
     var user = req.body;
-    con.query("SELECT DISTINCT U.firstname, U.lastname, U.id FROM User U, user_friend_rel F WHERE U.id = F.id_friend AND F.id_friend in (SELECT id_friend FROM user_friend_rel X, USER Y WHERE X.id_user = (SELECT id FROM user WHERE email = ?) AND X.status = 4)",[user.email], (err, result) => {
+    con.query("SELECT DISTINCT U.firstname, U.lastname, U.id FROM User U, user_friend F WHERE U.id = F.id_friend AND F.id_friend in (SELECT id_friend FROM user_friend X, USER Y WHERE X.id_user = (SELECT id FROM user WHERE email = ?) AND X.status = 4)",[user.email], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
@@ -109,9 +118,9 @@ app.post('/sEvents/user/searchForFriend', (req, res) => {
 app.post('/sEvents/user/addFriend', (req, res) => {
 
     var user = req.body;
-    con.query("INSERT IGNORE INTO user_friend_rel (id_user, id_friend, status) VALUES (?, ? , 2)", [user.userId, user.friendId], (err, result) => {
+    con.query("INSERT IGNORE INTO user_friend (id_user, id_friend, status) VALUES (?, ? , 2)", [user.userId, user.friendId], (err, result) => {
         if (err) throw err;
-        con.query("INSERT IGNORE INTO user_friend_rel (id_user, id_friend, status) VALUES (?, ? , 3)", [user.friendId, user.userId], (err, result) => {
+        con.query("INSERT IGNORE INTO user_friend (id_user, id_friend, status) VALUES (?, ? , 3)", [user.friendId, user.userId], (err, result) => {
             if (err) throw err;
             res.send(result);
         });
@@ -121,7 +130,7 @@ app.post('/sEvents/user/addFriend', (req, res) => {
 
 app.post('/sEvents/user/getListOfFriendRequestSent', (req, res) => {
     var user = req.body;
-    con.query("SELECT u.firstname, u.lastname, u.id FROM user u , user_friend_rel f WHERE u.id = f.id_user and f.id_friend = ? and f.status = ? ",[user.userId, user.type], (err, result) => {
+    con.query("SELECT u.firstname, u.lastname, u.id FROM user u , user_friend f WHERE u.id = f.id_user and f.id_friend = ? and f.status = ? ",[user.userId, user.type], (err, result) => {
         if (err) throw err;
         res.send(result);
     });
@@ -129,9 +138,9 @@ app.post('/sEvents/user/getListOfFriendRequestSent', (req, res) => {
 
 app.post('/sEvents/user/cancelRequest', (req, res) => {
     var user = req.body;
-    con.query("DELETE from user_friend_rel WHERE id_user = ? AND id_friend = ?", [user.userId, user.friendId], (err, result) => {
+    con.query("DELETE from user_friend WHERE id_user = ? AND id_friend = ?", [user.userId, user.friendId], (err, result) => {
         if (err) throw err;
-        con.query("DELETE from user_friend_rel WHERE id_user = ? AND id_friend = ?", [user.friendId, user.userId], (err, result) => {
+        con.query("DELETE from user_friend WHERE id_user = ? AND id_friend = ?", [user.friendId, user.userId], (err, result) => {
             if (err) throw err;
             res.send(result);
         });
@@ -141,14 +150,54 @@ app.post('/sEvents/user/cancelRequest', (req, res) => {
 
 app.post('/sEvents/user/acceptFriendRequest', (req, res) => {
     var user = req.body;
-    con.query("UPDATE user_friend_rel SET status = 4 WHERE id_user = ? AND id_friend = ?  and (status = 2 OR status = 3)", [user.userId, user.friendId], (err, result) => {
+    con.query("UPDATE user_friend SET status = 4 WHERE id_user = ? AND id_friend = ?  and (status = 2 OR status = 3)", [user.userId, user.friendId], (err, result) => {
         if (err) throw err;
-        con.query("UPDATE user_friend_rel SET status = 4 WHERE id_user = ? AND id_friend = ?  and (status = 2 OR status = 3)", [user.friendId, user.userId], (err, result) => {
+        con.query("UPDATE user_friend SET status = 4 WHERE id_user = ? AND id_friend = ?  and (status = 2 OR status = 3)", [user.friendId, user.userId], (err, result) => {
             if (err) throw err;
             res.send(result);
         });
     });
 });
 
+app.post('/sEvents/user/events/cancelEvents', (req, res) => {
+    var user = req.body;
+    con.query("DELETE FROM event_participants WHERE id_event = ?", [user.eventId], (err, result) => {
+        if (err) throw err;
+        con.query("DELETE FROM user_event WHERE id_user = ? AND id_event = ?", [user.userId, user.eventId], (err, result) => {
+            if (err) throw err;
+            con.query("DELETE FROM event_location WHERE id_event = ?", [user.eventId], (err, result) => {
+                if (err) throw err;
+                con.query("DELETE FROM event_type WHERE id_event = ?", [user.eventId], (err, result) => {
+                    if (err) throw err;
+                    con.query("DELETE FROM event WHERE id = ?", [user.eventId], (err, result) => {
+                        if (err) throw err;
+                    });
+                });
+            });
+        });
+    });
+});
+
+app.post('/sEvents/user/events/createEvent', (req, res) => {
+    var event = req.body;
+    con.query("INSERT INTO event (name) VALUES (?)",[event.name], (err, result) => {
+        if (err) throw err;
+        var eventId = result.insertId;
+        con.query("INSERT INTO event_location VALUES(?, ?)", [eventId, event.location], (err, result) => {
+            if (err) throw err;
+            con.query("INSERT INTO event_type VALUES(?, ?)", [eventId, event.type], (err, result) => {
+                if (err) throw err;
+                con.query("INSERT INTO user_event VALUES(?, ?)", [event.userId, eventId], (err, result) => {
+                    if (err) throw err;
+                    con.query("INSERT INTO event_participants VALUES(?, ?, ?)", [eventId, event.userId, 10], (err, result) => {
+                        if (err) throw err;
+                        res.send(result);
+                    });
+                });
+            });
+        });
+    });
+
+});
 app.listen(1337);
 
