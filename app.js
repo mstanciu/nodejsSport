@@ -171,6 +171,7 @@ app.post('/sEvents/user/events/cancelEvents', (req, res) => {
                     if (err) throw err;
                     con.query("DELETE FROM event WHERE id = ?", [user.eventId], (err, result) => {
                         if (err) throw err;
+                        res.send(result);
                     });
                 });
             });
@@ -197,7 +198,22 @@ app.post('/sEvents/user/events/createEvent', (req, res) => {
             });
         });
     });
+});
 
+app.post('/sEvents/user/events/searchForEvent', (req, res) => {
+    var event = req.body;
+    con.query("SELECT E.id, E.name, T.type_event, L.location FROM event E, event_type T, event_location L WHERE E.id = T.id_event AND E.id = L.id_event AND E.name = ?", [event.name], (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    });
+});
+
+app.post('/sEvents/user/events/joinEvent', (req, res) => {
+    var event = req.body;
+    con.query("INSERT INTO event_participants VALUES (?,?,3)", [event.eventId, event.userId], (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    });
 });
 app.listen(1337);
 
